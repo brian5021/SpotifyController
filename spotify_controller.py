@@ -14,14 +14,15 @@ playlist_id = '0fXCWK0ZDlntNKnIZs1GE1'
 def show_tracks(tracks):
     results = []
     for i, track in enumerate(tracks['items']):
-        results.append(Track(track['name'], track['artists'][0]['name'], track['id']))
+        results.append(Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url']))
     return results
 
 def show_tracks_in_playlist(playlist):
     results = []
     for i, item in enumerate(playlist['items']):
         track = item["track"]
-        results.append(Track(track['name'], track['artists'][0]['name'], track['id']))
+        print track
+        results.append(Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url']))
     return results
 
 def search(term):
@@ -48,7 +49,7 @@ def play_song(id):
     authenticate('user-read-playback-state')
     uri = str('spotify:track:' + id)
     #payload = {'context_uri':'spotify:playlist:0fXCWK0ZDlntNKnIZs1GE1'}
-    payload = {"uris": [uri]}
+    payload = {"context_uri":'spotify:playlist:0fXCWK0ZDlntNKnIZs1GE1', "offset": {"uri": uri}}
     result = requests.put(url='https://api.spotify.com/v1/me/player/play',
                           json=payload,
                           headers={'Authorization': "Bearer " + token})
@@ -59,19 +60,20 @@ def currently_playing():
     result = requests.get(url='https://api.spotify.com/v1/me/player/currently-playing', headers={'Authorization': "Bearer " + token})
     result_json = result.json()
     track = result_json["item"]
-    return Track(track['name'], track['artists'][0]['name'], track['id'])
+    return Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'])
 
 def authenticate(scope):
     global sp, token
     test = 'user-modify-playback-state'
-    token = util.prompt_for_user_token('126442621', test)
+    token = util.prompt_for_user_token(username='126442621', scope='playlist-modify-public user-modify-playback-state user-read-currently-playing')
     print token
     sp = spotipy.Spotify(auth=token)
 
 if __name__ == '__main__':
     term = sys.argv[1]
-    results = search("baby")
-    play_song(results[0].id)
+    result = search("something")
+    print result
+    print "something"
 
 
 

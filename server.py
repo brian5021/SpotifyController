@@ -23,11 +23,15 @@ def search():
     term = request.args["term"]
     return json.dumps([ob.__dict__ for ob in spotify_controller.search(term)])
 
-@app.route('/play')
+@app.route('/play', methods=['OPTIONS', 'POST'])
 def play():
-    results = spotify_controller.search("Baby")
-    spotify_controller.play_song(results[0].id)
-    return "OK"
+    if request.method == 'POST':
+        data = request.json
+        id = data['id']
+        spotify_controller.play_song(id)
+        return "OK"
+    else:
+        return "OK"
 
 @app.route('/playing')
 def playing():
