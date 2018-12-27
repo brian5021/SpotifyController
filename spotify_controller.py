@@ -19,7 +19,7 @@ def show_tracks(tracks):
     results = []
     for i, track in enumerate(tracks['items']):
         results.append(
-            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url']))
+            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url']), None, None)
     return results
 
 
@@ -29,7 +29,7 @@ def show_tracks_in_playlist(playlist):
         track = item["track"]
         print(track)
         results.append(
-            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url']))
+            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None, None))
     return results
 
 
@@ -110,4 +110,6 @@ def authenticate():
 
 if __name__ == '__main__':
     term = sys.argv[1]
-    print(currently_playing().name)
+    first = currently_playing()
+    last = playlist()
+    print("nothing")
