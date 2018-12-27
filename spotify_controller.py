@@ -19,7 +19,7 @@ def show_tracks(tracks):
     results = []
     for i, track in enumerate(tracks['items']):
         results.append(
-            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url']), None, None)
+            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None, None))
     return results
 
 
