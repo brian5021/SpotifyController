@@ -4,11 +4,15 @@ from model import Track
 import spotipy.util as util
 import requests
 import asyncio
-import time
+from configparser import ConfigParser
 from threading import Thread
 
 sp = None
 token = None
+
+parser = ConfigParser()
+parser.read('config.ini')
+
 username = '126442621'
 playlist_id = '0fXCWK0ZDlntNKnIZs1GE1'
 
@@ -121,7 +125,10 @@ def currently_playing():
 def authenticate():
     global sp, token
     token = util.prompt_for_user_token(username='126442621',
-                                       scope='playlist-modify-public user-modify-playback-state user-read-currently-playing')
+                                       scope='playlist-modify-public user-modify-playback-state user-read-currently-playing',
+                                       client_id=parser['SPOTIFY_CREDS']['SPOTIPY_CLIENT_ID'],
+                                       client_secret=parser['SPOTIFY_CREDS']['SPOTIPY_CLIENT_SECRET'],
+                                       redirect_uri=parser['SPOTIFY_CREDS']['SPOTIPY_REDIRECT_URI'])
     print(token)
     sp = spotipy.Spotify(auth=token)
 
