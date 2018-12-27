@@ -1,7 +1,7 @@
 from flask import Flask
 from flask import request
 from flask_cors import CORS
-from SpotifyController import spotify_controller
+import spotify_controller
 import json
 
 app = Flask(__name__)

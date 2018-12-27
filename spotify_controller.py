@@ -1,6 +1,6 @@
 import sys
 import spotipy
-from SpotifyController.model import Track
+from model import Track
 import spotipy.util as util
 import requests
 import asyncio
@@ -45,9 +45,9 @@ def start_loop(loop, current, id):
     asyncio.set_event_loop(loop)
     loop.run_until_complete(wait_and_play(current, id))
 
-
-async def wait_and_play(track, id):
-    await asyncio.sleep((track.duration_ms - track.progress_ms) / 1000)
+@asyncio.coroutine
+def wait_and_play(track, id):
+    yield from asyncio.sleep((track.duration_ms - track.progress_ms) / 1000)
     if (queue[0] == id):
         play_song(id)
         queue.pop(0)
