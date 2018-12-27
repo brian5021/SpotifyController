@@ -19,7 +19,8 @@ def show_tracks(tracks):
     results = []
     for i, track in enumerate(tracks['items']):
         results.append(
-            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None, track['duration_ms']))
+            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None,
+                  track['duration_ms']))
     return results
 
 
@@ -29,8 +30,16 @@ def show_tracks_in_playlist(playlist):
         track = item["track"]
         print(track)
         results.append(
-            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None, track['duration_ms']))
+            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None,
+                  track['duration_ms']))
     return results
+
+
+def find_song_position_in_playlist(id):
+    tracks = playlist()
+    for i, track in enumerate(tracks):
+        if track.id == id:
+            return i
 
 
 def queue_song(id):
@@ -45,6 +54,7 @@ def queue_song(id):
 def start_loop(loop, current, id):
     asyncio.set_event_loop(loop)
     loop.run_until_complete(wait_and_play(current, id))
+
 
 @asyncio.coroutine
 def wait_and_play(track, id):
@@ -69,21 +79,22 @@ def playlist():
     return show_tracks_in_playlist(playlist)
 
 
-def add_track_to_playlist(track):
-    authenticate()
-    sp.user_playlist_add_tracks(username, playlist_id=playlist_id,
-                                tracks=[track.id])
-
-
 def add_id_to_playlist(id):
     authenticate()
-    sp.user_playlist_add_tracks(username, playlist_id=playlist_id,
-                                tracks=[id])
+    current = currently_playing()
+    if current is not None:
+        current_offset = find_song_position_in_playlist(current.id)
+        sp.user_playlist_add_tracks(username, playlist_id=playlist_id,
+                                    tracks=[id], position=current_offset + 1 + queue.__len__())
+    else:
+        sp.user_playlist_add_tracks(username, playlist_id=playlist_id,
+                                    tracks=[id])
 
 
 def get_track(id):
     track = sp.track(id)
-    return Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None, track['duration_ms'])
+    return Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None,
+                 track['duration_ms'])
 
 
 def play_song(id):
@@ -117,7 +128,7 @@ def authenticate():
 
 if __name__ == '__main__':
     term = sys.argv[1]
-    first = currently_playing()
-    track = get_track(first.id)
-    last = playlist()
+    current = currently_playing()
+    position = find_song_position_in_playlist(current.id)
+    add_id_to_playlist(current.id)
     print("nothing")
