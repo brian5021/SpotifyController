@@ -19,7 +19,7 @@ def show_tracks(tracks):
     results = []
     for i, track in enumerate(tracks['items']):
         results.append(
-            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None, None))
+            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None, track['duration_ms']))
     return results
 
 
@@ -29,15 +29,16 @@ def show_tracks_in_playlist(playlist):
         track = item["track"]
         print(track)
         results.append(
-            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None, None))
+            Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None, track['duration_ms']))
     return results
 
 
 def queue_song(id):
-    queue.append(id)
+    track_to_queue = get_track(id)
+    queue.append(track_to_queue)
     current = currently_playing()
     new_loop = asyncio.new_event_loop()
-    t = Thread(target=start_loop, args=(new_loop, current, id,))
+    t = Thread(target=start_loop, args=(new_loop, current, track_to_queue.id,))
     t.start()
 
 
@@ -48,8 +49,9 @@ def start_loop(loop, current, id):
 @asyncio.coroutine
 def wait_and_play(track, id):
     yield from asyncio.sleep((track.duration_ms - track.progress_ms) / 1000)
-    if (queue[0] == id):
+    if (queue[0].id == id):
         play_song(id)
+        yield from asyncio.sleep(queue[0].duration_ms / 1000)
         queue.pop(0)
     else:
         wait_and_play(currently_playing(), id)
@@ -77,6 +79,11 @@ def add_id_to_playlist(id):
     authenticate()
     sp.user_playlist_add_tracks(username, playlist_id=playlist_id,
                                 tracks=[id])
+
+
+def get_track(id):
+    track = sp.track(id)
+    return Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None, track['duration_ms'])
 
 
 def play_song(id):
@@ -111,5 +118,6 @@ def authenticate():
 if __name__ == '__main__':
     term = sys.argv[1]
     first = currently_playing()
+    track = get_track(first.id)
     last = playlist()
     print("nothing")
