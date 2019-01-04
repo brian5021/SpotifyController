@@ -43,7 +43,7 @@ def find_song_position_in_playlist(id):
     tracks = playlist()
     for i, track in enumerate(tracks):
         if track.id == id:
-            return i
+            return i, tracks.__len__()
 
 
 def queue_song(id):
@@ -87,9 +87,9 @@ def add_id_to_playlist(id):
     authenticate()
     current = currently_playing()
     if current is not None:
-        current_offset = find_song_position_in_playlist(current.id)
+        current_offset, playlist_length = find_song_position_in_playlist(current.id)
         sp.user_playlist_add_tracks(username, playlist_id=playlist_id,
-                                    tracks=[id], position=current_offset + 1 + queue.__len__())
+                                    tracks=[id], position=(current_offset + 1 + queue.__len__()) % playlist_length)
     else:
         sp.user_playlist_add_tracks(username, playlist_id=playlist_id,
                                     tracks=[id])
@@ -136,6 +136,6 @@ def authenticate():
 if __name__ == '__main__':
     term = sys.argv[1]
     current = currently_playing()
-    position = find_song_position_in_playlist(current.id)
+    position, playlist_length = find_song_position_in_playlist(current.id)
     add_id_to_playlist(current.id)
     print("nothing")
