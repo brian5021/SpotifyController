@@ -41,6 +41,10 @@ def play():
 def playing():
     return json.dumps(spotify_controller.currently_playing().__dict__)
 
+@app.route('/queue')
+def queue():
+    return json.dumps([ob.__dict__ for ob in spotify_controller.get_queue()])
+
 
 @app.route('/add', methods=['OPTIONS', 'POST'])
 def add():

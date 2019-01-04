@@ -6,3 +6,7 @@ class Track:
         self.albumSrc = albumSrc
         self.progress_ms = progress_ms
         self.duration_ms = duration_ms
+
+
+    def __str__(self):
+     return self.name

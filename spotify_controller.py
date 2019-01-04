@@ -32,7 +32,6 @@ def show_tracks_in_playlist(playlist):
     results = []
     for i, item in enumerate(playlist['items']):
         track = item["track"]
-        print(track)
         results.append(
             Track(track['name'], track['artists'][0]['name'], track['id'], track['album']['images'][0]['url'], None,
                   track['duration_ms']))
@@ -46,7 +45,14 @@ def find_song_position_in_playlist(id):
             return i, tracks.__len__()
 
 
+def get_queue():
+    global queue
+    print(queue)
+    return queue
+
+
 def queue_song(id):
+    global queue
     track_to_queue = get_track(id)
     queue.append(track_to_queue)
     current = currently_playing()
@@ -62,13 +68,15 @@ def start_loop(loop, current, id):
 
 @asyncio.coroutine
 def wait_and_play(track, id):
+    global queue
     yield from asyncio.sleep((track.duration_ms - track.progress_ms) / 1000)
     if (queue[0].id == id):
         play_song(id)
-        yield from asyncio.sleep(queue[0].duration_ms / 1000)
+        yield from asyncio.sleep(queue[0].duration_ms / 1000 - 2)
         queue.pop(0)
     else:
-        wait_and_play(currently_playing(), id)
+        yield from asyncio.sleep(2)
+        yield from wait_and_play(currently_playing(), id)
 
 
 def search(term):
@@ -84,13 +92,16 @@ def playlist():
 
 
 def add_id_to_playlist(id):
+    global queue
     authenticate()
     current = currently_playing()
     if current is not None:
         current_offset, playlist_length = find_song_position_in_playlist(current.id)
         queue_offset = queue.__len__()
-        if current in queue:
-            queue_offset = queue_offset - queue.index(current) - 1
+        for track in queue:
+            if track.id == current.id:
+                queue_offset = queue_offset - queue.index(track) - 1
+                break
         sp.user_playlist_add_tracks(username, playlist_id=playlist_id,
                                     tracks=[id], position=(current_offset + 1 + queue_offset) % playlist_length)
     else:
@@ -112,7 +123,6 @@ def play_song(id):
     result = requests.put(url='https://api.spotify.com/v1/me/player/play',
                           json=payload,
                           headers={'Authorization': "Bearer " + token})
-    print(result)
 
 
 def currently_playing():
@@ -132,7 +142,6 @@ def authenticate():
                                        client_id=parser['SPOTIFY_CREDS']['SPOTIPY_CLIENT_ID'],
                                        client_secret=parser['SPOTIFY_CREDS']['SPOTIPY_CLIENT_SECRET'],
                                        redirect_uri=parser['SPOTIFY_CREDS']['SPOTIPY_REDIRECT_URI'])
-    print(token)
     sp = spotipy.Spotify(auth=token)
 
 
