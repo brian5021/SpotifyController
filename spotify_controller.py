@@ -88,8 +88,11 @@ def add_id_to_playlist(id):
     current = currently_playing()
     if current is not None:
         current_offset, playlist_length = find_song_position_in_playlist(current.id)
+        queue_offset = queue.__len__()
+        if current in queue:
+            queue_offset = queue_offset - queue.index(current) - 1
         sp.user_playlist_add_tracks(username, playlist_id=playlist_id,
-                                    tracks=[id], position=(current_offset + 1 + queue.__len__()) % playlist_length)
+                                    tracks=[id], position=(current_offset + 1 + queue_offset) % playlist_length)
     else:
         sp.user_playlist_add_tracks(username, playlist_id=playlist_id,
                                     tracks=[id])
